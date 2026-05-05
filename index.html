@@ -261,22 +261,36 @@
   <div class="flip-book" id="flipbookContainer"></div>
 
   <!-- Footer -->
-  
+  <div class="footer-note">
+    <div class="flex flex-wrap justify-between items-center gap-3 text-xs text-slate-300">
+      <div class="flex gap-3">
+        <span>📘 <span class="text-amber-300 font-medium">Bìa đơn</span> (1 trang trung tâm)</span>
+        <span>🔄 Trạng thái: <span id="stateLabel" class="text-amber-300">đang tải</span></span>
+      </div>
+      <div class="flex gap-3">
+        <span>✨ Lật trang 3D mượt</span>
+        <span>📱 Tương thích mọi thiết bị</span>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
   // ======================= CẤU HÌNH =======================
   // TỔNG SỐ TRANG: 50 TRANG
-  // Đường dẫn ảnh: images/page_001.jpg, images/page_002.jpg, ..., images/page_050.jpg
+  // Ảnh nằm CÙNG CẤP với file HTML (không cần thư mục images)
+  // Đặt tên ảnh: page_001.jpg, page_002.jpg, ..., page_050.jpg
   const TOTAL_PAGES = 50;
-  const IMAGE_BASE_PATH = 'page_';
-  const IMAGE_EXTENSION = '.jpg';
+  // Đường dẫn trực tiếp - ảnh nằm cùng thư mục với file HTML
+  const getImagePath = (pageNumber) => {
+    const pageNum = String(pageNumber).padStart(3, '0');
+    return `page_${pageNum}.jpg`;
+  };
   
   // Tạo mảng đường dẫn ảnh
   const imagePaths = [];
   for (let i = 1; i <= TOTAL_PAGES; i++) {
-    const pageNum = String(i).padStart(3, '0');
-    imagePaths.push(`${IMAGE_BASE_PATH}${pageNum}${IMAGE_EXTENSION}`);
+    imagePaths.push(getImagePath(i));
   }
   
   let pageFlipInstance = null;
@@ -364,6 +378,14 @@
       loadedImages[pageIndex] = true;
       totalLoaded++;
       updateLoadingProgress();
+      // Hiển thị lỗi trên skeleton
+      const skeletonDiv = pageDiv.querySelector('.skeleton-page');
+      if (skeletonDiv) {
+        const errorSpan = document.createElement('span');
+        errorSpan.innerText = `❌ Không tải được trang ${pageIndex + 1}`;
+        errorSpan.className = 'text-red-600 text-xs bg-red-100 px-3 py-1.5 rounded-full';
+        skeletonDiv.appendChild(errorSpan);
+      }
     };
     img.src = imageUrl;
     
