@@ -1,14 +1,16 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>VTD Smarthome - Sách 3D Bìa Đơn Thuần Túy</title>
+  <meta name="description" content="VTD Smarthome - Giải pháp rèm & chiếu sáng thông minh - Sách sản phẩm 3D">
+  <title>VTD Smarthome | Sách sản phẩm 3D - 50 trang</title>
+  
+  <!-- Fonts & CSS -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
-  <script>tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter','system-ui','sans-serif'] } } } }</script>
-  <!-- PageFlip core + PDF.js -->
   <script src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  
   <style>
     * {
       margin: 0;
@@ -16,153 +18,271 @@
       box-sizing: border-box;
       -webkit-tap-highlight-color: transparent;
     }
+
     body {
+      background: linear-gradient(135deg, #0a0f1e 0%, #0c1222 50%, #0a0f1e 100%);
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      padding: 20px;
       min-height: 100vh;
-      background: radial-gradient(circle at 15% 5%, rgba(248,214,113,0.12), transparent 25%), 
-                  radial-gradient(circle at 85% 70%, rgba(120,80,30,0.08), transparent 30%),
-                  #070b16;
-      font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-      padding: 16px 12px;
+      position: relative;
     }
-    .flipbook-container {
-      max-width: 1300px;
+
+    /* Hiệu ứng nền sang trọng */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: radial-gradient(circle at 20% 30%, rgba(248, 214, 113, 0.08) 0%, transparent 50%),
+                  radial-gradient(circle at 80% 70%, rgba(248, 214, 113, 0.05) 0%, transparent 60%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .flipbook-wrapper {
+      max-width: 1400px;
       margin: 0 auto;
-      background: rgba(3, 7, 18, 0.55);
-      backdrop-filter: blur(6px);
-      border-radius: 2rem;
-      padding: 0.9rem;
+      position: relative;
+      z-index: 1;
     }
+
+    /* Header đẹp */
+    .header-card {
+      background: rgba(10, 15, 30, 0.75);
+      backdrop-filter: blur(20px);
+      border-radius: 2rem;
+      border: 1px solid rgba(248, 190, 70, 0.25);
+      padding: 1rem 1.5rem;
+      margin-bottom: 1.5rem;
+      transition: all 0.3s ease;
+    }
+
+    .brand-badge {
+      background: linear-gradient(135deg, rgba(248, 190, 70, 0.2), rgba(248, 190, 70, 0.05));
+      border-radius: 100px;
+      padding: 0.25rem 1rem;
+      display: inline-block;
+      font-size: 0.7rem;
+      letter-spacing: 0.15em;
+      color: #f8be46;
+      border: 1px solid rgba(248, 190, 70, 0.3);
+    }
+
+    /* Nút điều khiển */
+    .control-btn {
+      background: rgba(15, 20, 40, 0.9);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(248, 190, 70, 0.4);
+      color: #f8d68a;
+      padding: 0.5rem 1.25rem;
+      border-radius: 60px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .control-btn:hover {
+      background: rgba(248, 190, 70, 0.2);
+      border-color: #f8be46;
+      color: #fff0c0;
+      transform: translateY(-1px);
+    }
+
+    .control-btn:active {
+      transform: scale(0.96);
+    }
+
+    /* Thông tin trang */
+    .page-counter {
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(12px);
+      padding: 0.4rem 1.2rem;
+      border-radius: 60px;
+      font-family: 'Inter', monospace;
+      font-weight: 600;
+      color: #f8be46;
+      border: 1px solid rgba(248, 190, 70, 0.3);
+    }
+
+    /* Container sách */
     .flip-book {
-      width: 100%;
       background: #f5efdf;
-      border-radius: 1.2rem;
-      box-shadow: 0 30px 60px rgba(0,0,0,0.5);
+      border-radius: 1.5rem;
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(248, 190, 70, 0.2);
       overflow: hidden;
     }
+
     .page {
-      background-color: #fef9ef;
+      background: #fef9ef;
       display: flex;
       align-items: center;
       justify-content: center;
       overflow: hidden;
-      box-shadow: inset 0 0 0 1px rgba(190, 152, 78, 0.3);
+      box-shadow: inset 0 0 0 1px rgba(190, 152, 78, 0.2);
     }
+
     .page img {
       max-width: 100%;
       max-height: 100%;
       object-fit: contain;
       display: block;
-      border-radius: 2px;
+      transition: opacity 0.2s ease;
     }
+
+    /* Skeleton loading */
     .skeleton-page {
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 14px;
+      gap: 16px;
       background: linear-gradient(135deg, #fff3e0, #fcebcb);
       width: 100%;
       height: 100%;
     }
-    .spinner-ring {
-      width: 38px;
-      height: 38px;
+
+    .spinner {
+      width: 44px;
+      height: 44px;
       border: 3px solid #e2bc6c;
       border-top-color: #b57c2c;
       border-radius: 50%;
-      animation: spinRing 0.8s linear infinite;
+      animation: spin 0.8s linear infinite;
     }
-    @keyframes spinRing { to { transform: rotate(360deg); } }
-    .nav-btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0.5rem 1.2rem;
-      border-radius: 40px;
-      font-weight: 600;
-      font-size: 0.85rem;
-      backdrop-filter: blur(12px);
-      background: rgba(20, 25, 45, 0.85);
-      border: 1px solid rgba(248, 190, 70, 0.55);
-      color: #ffe1a0;
-      transition: all 0.2s ease;
-      cursor: pointer;
-      gap: 6px;
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
     }
-    .nav-btn:active { transform: scale(0.96); }
-    .stats-panel {
-      background: rgba(0, 0, 0, 0.6);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(230, 180, 60, 0.45);
-      border-radius: 50px;
-      padding: 0.25rem 1rem;
+
+    /* Thanh tiến trình */
+    .progress-bar {
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(8px);
+      border-radius: 100px;
+      padding: 0.3rem;
     }
+
     .progress-fill {
-      transition: width 0.25s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+      background: linear-gradient(90deg, #f8be46, #d4a03a);
+      border-radius: 100px;
+      height: 6px;
+      transition: width 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
     }
-    @media (max-width: 640px) {
-      body { padding: 8px; }
-      .nav-btn { padding: 0.4rem 0.9rem; font-size: 0.75rem; }
-      .stats-panel { padding: 0.2rem 0.8rem; font-size: 0.8rem; }
-      .flipbook-container { padding: 0.6rem; }
+
+    /* Footer */
+    .footer-note {
+      background: rgba(10, 15, 30, 0.6);
+      backdrop-filter: blur(12px);
+      border-radius: 1.5rem;
+      padding: 0.75rem 1.25rem;
+      margin-top: 1.5rem;
+      border: 1px solid rgba(248, 190, 70, 0.2);
     }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      body { padding: 12px; }
+      .header-card { padding: 0.75rem 1rem; margin-bottom: 1rem; }
+      .control-btn { padding: 0.4rem 1rem; font-size: 0.75rem; gap: 4px; }
+      .page-counter { padding: 0.3rem 1rem; font-size: 0.85rem; }
+    }
+
     @media (max-width: 480px) {
-      .nav-btn { padding: 0.35rem 0.8rem; }
+      body { padding: 8px; }
+      .control-btn { padding: 0.35rem 0.8rem; }
+      .brand-badge { font-size: 0.6rem; }
+    }
+
+    /* Hiệu ứng hover cho sách */
+    .flip-book:hover {
+      box-shadow: 0 35px 65px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(248, 190, 70, 0.35);
     }
   </style>
 </head>
 <body>
 
-<div class="flipbook-container">
-  <!-- header -->
-  <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
-    <div class="flex-1 min-w-0">
-      <div class="text-[10px] uppercase tracking-[0.3em] text-amber-300/70">VTD SMARTHOME • BÌA ĐƠN THUẦN TÚY</div>
-      <h1 class="text-xl sm:text-2xl font-bold text-white truncate">Giải pháp Rèm & Chiếu Sáng Thông Minh</h1>
-      <p class="text-slate-300 text-xs hidden sm:block">Trang đầu là bìa đơn (1 trang giữa) - Lật sang trang 2 mới xuất hiện 2 trang</p>
-    </div>
-    <div class="flex items-center gap-2 bg-black/30 rounded-full p-1 pr-4 border border-white/10 shrink-0">
-      <button class="nav-btn" id="prevPageBtn"> ◀ Trước</button>
-      <div class="stats-panel text-sm font-mono"><span id="currentPageNum">1</span> / <span id="totalPagesNum">-</span></div>
-      <button class="nav-btn" id="nextPageBtn">Sau ▶</button>
+<div class="flipbook-wrapper">
+  <!-- Header sang trọng -->
+  <div class="header-card">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+      <div>
+        <div class="brand-badge mb-2 inline-flex items-center gap-1">
+          <span>✦</span> VTD SMARTHOME <span>✦</span>
+        </div>
+        <h1 class="text-2xl md:text-3xl font-bold text-white tracking-tight">
+          Giải pháp Rèm & Chiếu sáng Thông minh
+        </h1>
+        <p class="text-slate-300 text-sm mt-1 hidden sm:block">Sách sản phẩm 3D • Trải nghiệm lật trang chân thực</p>
+      </div>
+      
+      <div class="flex items-center gap-2">
+        <button class="control-btn" id="prevPageBtn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M15 18l-6-6 6-6"/>
+          </svg>
+          Trang trước
+        </button>
+        <div class="page-counter">
+          <span id="currentPageNum">1</span> / <span id="totalPagesNum">50</span>
+        </div>
+        <button class="control-btn" id="nextPageBtn">
+          Trang sau
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 18l6-6-6-6"/>
+          </svg>
+        </button>
+      </div>
     </div>
   </div>
 
-  <!-- Thanh tiến trình -->
-  <div class="mb-4 space-y-1">
-    <div class="flex justify-between text-[11px] text-amber-200/80 px-1">
-      <span>📖 Tải ưu tiên 10 trang đầu • Bìa đơn 1 trang trung tâm</span>
-      <span id="progressPercent">0%</span>
+  <!-- Thanh tiến trình tải -->
+  <div class="mb-4 space-y-2">
+    <div class="flex justify-between text-xs text-amber-300/80 px-1">
+      <span class="flex items-center gap-1">
+        <span>📖</span> Đang tải sách 50 trang
+      </span>
+      <span id="progressPercent" class="font-mono">0%</span>
     </div>
-    <div class="w-full bg-slate-800/70 rounded-full h-2.5 overflow-hidden shadow-sm">
-      <div id="progressFill" class="progress-fill h-full rounded-full bg-gradient-to-r from-amber-400 to-amber-500" style="width: 0%;"></div>
+    <div class="progress-bar">
+      <div id="progressFill" class="progress-fill" style="width: 0%;"></div>
     </div>
-    <div id="loadingStatus" class="text-right text-[10px] text-slate-400 mt-1">🔄 Đang khởi tạo & tải trang ưu tiên...</div>
+    <div id="loadingStatus" class="text-right text-[10px] text-slate-400">
+      🔄 Khởi tạo sách 3D...
+    </div>
   </div>
 
-  <!-- 3D FlipBook container -->
+  <!-- Flipbook container -->
   <div class="flip-book" id="flipbookContainer"></div>
 
-  <!-- footer -->
-  <div class="flex flex-wrap justify-between items-center gap-2 mt-4 text-[11px] text-slate-400 px-1">
-    <div class="flex gap-3">
-      <span>📘 Chế độ: <span id="modeLabel" class="text-amber-300 font-medium">Bìa đơn (1 trang)</span></span>
-      <span>🔄 Trạng thái: <span id="stateLabel" class="text-amber-300">đang tải</span></span>
-    </div>
-    <div>✨ Lật trang 3D | Responsive mobile</div>
-  </div>
+  <!-- Footer -->
+  
 </div>
 
 <script>
   // ======================= CẤU HÌNH =======================
-  const PDF_URL = 'output_split.pdf';
-  const PRIORITY_PAGES = 10;    // tải 10 trang đầu tiên trước
+  // TỔNG SỐ TRANG: 50 TRANG
+  // Đường dẫn ảnh: images/page_001.jpg, images/page_002.jpg, ..., images/page_050.jpg
+  const TOTAL_PAGES = 50;
+  const IMAGE_BASE_PATH = 'page_';
+  const IMAGE_EXTENSION = '.jpg';
   
-  let pdfDoc = null;
-  let totalPages = 0;
-  let pageImages = [];           // lưu dataURL, null nếu chưa tải
+  // Tạo mảng đường dẫn ảnh
+  const imagePaths = [];
+  for (let i = 1; i <= TOTAL_PAGES; i++) {
+    const pageNum = String(i).padStart(3, '0');
+    imagePaths.push(`${IMAGE_BASE_PATH}${pageNum}${IMAGE_EXTENSION}`);
+  }
+  
   let pageFlipInstance = null;
-  let pageDivs = [];             // DOM elements .page
+  let pageDivs = [];
+  let loadedImages = new Array(TOTAL_PAGES).fill(false);
+  let totalLoaded = 0;
   
   // DOM elements
   const container = document.getElementById('flipbookContainer');
@@ -170,67 +290,29 @@
   const currentSpan = document.getElementById('currentPageNum');
   const prevBtn = document.getElementById('prevPageBtn');
   const nextBtn = document.getElementById('nextPageBtn');
-  const progressFillDiv = document.getElementById('progressFill');
-  const progressPercentSpan = document.getElementById('progressPercent');
-  const loadingMsgSpan = document.getElementById('loadingStatus');
-  const modeLabelSpan = document.getElementById('modeLabel');
-  const stateLabelSpan = document.getElementById('stateLabel');
+  const progressFill = document.getElementById('progressFill');
+  const progressPercent = document.getElementById('progressPercent');
+  const loadingStatus = document.getElementById('loadingStatus');
+  const stateLabel = document.getElementById('stateLabel');
   
-  // Cập nhật thanh tiến trình
-  function updateProgress() {
-    if (!totalPages) return;
-    const loadedCount = pageImages.filter(img => img !== null).length;
-    let percent = Math.floor((loadedCount / totalPages) * 100);
-    percent = Math.min(100, percent);
-    progressFillDiv.style.width = `${percent}%`;
-    progressPercentSpan.innerText = `${percent}%`;
-    if (percent === 100) {
-      loadingMsgSpan.innerHTML = '✅ Toàn bộ PDF đã sẵn sàng. Bìa đơn 1 trang trung tâm!';
-    } else if (loadedCount >= PRIORITY_PAGES) {
-      loadingMsgSpan.innerHTML = `✨ Đã tải ${loadedCount}/${totalPages} trang. Sách có thể lật, các trang còn lại tải ngầm.`;
+  totalSpan.innerText = TOTAL_PAGES;
+  
+  // Cập nhật tiến trình tải
+  function updateLoadingProgress() {
+    const percent = Math.floor((totalLoaded / TOTAL_PAGES) * 100);
+    progressFill.style.width = `${percent}%`;
+    progressPercent.innerText = `${percent}%`;
+    
+    if (totalLoaded === TOTAL_PAGES) {
+      loadingStatus.innerHTML = '✅ Đã tải xong toàn bộ 50 trang. Sách sẵn sàng!';
+      loadingStatus.classList.add('text-green-400');
     } else {
-      loadingMsgSpan.innerHTML = `⏳ Đang tải ưu tiên ${PRIORITY_PAGES} trang đầu (${loadedCount}/${totalPages})...`;
+      loadingStatus.innerHTML = `⏳ Đang tải ảnh... ${totalLoaded}/${TOTAL_PAGES} trang`;
     }
   }
   
-  // Render 1 trang PDF -> dataURL
-  async function renderSinglePage(pdfDocument, pageIndex) {
-    if (pageImages[pageIndex] !== null) return pageImages[pageIndex];
-    try {
-      const pageNum = pageIndex + 1;
-      const page = await pdfDocument.getPage(pageNum);
-      // Scale phù hợp với tỷ lệ ngang
-      const viewport = page.getViewport({ scale: 1.45 });
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-      canvas.width = viewport.width;
-      canvas.height = viewport.height;
-      await page.render({ canvasContext: ctx, viewport: viewport }).promise;
-      const dataURL = canvas.toDataURL('image/jpeg', 0.92);
-      pageImages[pageIndex] = dataURL;
-      
-      // Cập nhật DOM nếu đã có pageDiv
-      if (pageFlipInstance && pageDivs[pageIndex]) {
-        const targetDiv = pageDivs[pageIndex];
-        while (targetDiv.firstChild) targetDiv.removeChild(targetDiv.firstChild);
-        const newImg = document.createElement('img');
-        newImg.src = dataURL;
-        newImg.alt = `Trang ${pageIndex+1}`;
-        newImg.style.maxWidth = '100%';
-        newImg.style.maxHeight = '100%';
-        newImg.style.objectFit = 'contain';
-        targetDiv.appendChild(newImg);
-      }
-      updateProgress();
-      return dataURL;
-    } catch (err) {
-      console.warn(`Lỗi render trang ${pageIndex+1}:`, err);
-      return null;
-    }
-  }
-  
-  // Tạo phần tử trang (skeleton nếu chưa có ảnh)
-  function createPageElement(pageIdx, existingImageURL = null) {
+  // Tạo phần tử trang (có skeleton nếu chưa tải xong ảnh)
+  function createPageElement(pageIndex, imageUrl) {
     const pageDiv = document.createElement('div');
     pageDiv.className = 'page';
     pageDiv.style.width = '100%';
@@ -241,169 +323,159 @@
     pageDiv.style.justifyContent = 'center';
     pageDiv.style.overflow = 'hidden';
     
-    if (existingImageURL) {
-      const img = document.createElement('img');
-      img.src = existingImageURL;
-      img.alt = `Trang ${pageIdx+1}`;
-      img.style.maxWidth = '100%';
-      img.style.maxHeight = '100%';
-      img.style.objectFit = 'contain';
-      pageDiv.appendChild(img);
-    } else {
-      const skeleton = document.createElement('div');
-      skeleton.className = 'skeleton-page';
-      const spinner = document.createElement('div');
-      spinner.className = 'spinner-ring';
-      const textSpan = document.createElement('span');
-      textSpan.innerText = `Đang tải trang ${pageIdx+1}`;
-      textSpan.className = 'text-amber-800 text-xs bg-amber-100/70 px-2 py-1 rounded-full';
-      skeleton.appendChild(spinner);
-      skeleton.appendChild(textSpan);
-      pageDiv.appendChild(skeleton);
-    }
+    // Hiển thị skeleton loading
+    const skeleton = document.createElement('div');
+    skeleton.className = 'skeleton-page';
+    const spinner = document.createElement('div');
+    spinner.className = 'spinner';
+    const textSpan = document.createElement('span');
+    textSpan.innerText = `Đang tải trang ${pageIndex + 1}`;
+    textSpan.className = 'text-amber-800 text-xs bg-amber-100/70 px-3 py-1.5 rounded-full';
+    skeleton.appendChild(spinner);
+    skeleton.appendChild(textSpan);
+    pageDiv.appendChild(skeleton);
+    
+    // Tải ảnh background
+    const img = new Image();
+    img.onload = () => {
+      if (!loadedImages[pageIndex]) {
+        loadedImages[pageIndex] = true;
+        totalLoaded++;
+        updateLoadingProgress();
+        
+        // Thay skeleton bằng ảnh thật
+        while (pageDiv.firstChild) pageDiv.removeChild(pageDiv.firstChild);
+        const realImg = document.createElement('img');
+        realImg.src = imageUrl;
+        realImg.alt = `Trang ${pageIndex + 1}`;
+        realImg.style.maxWidth = '100%';
+        realImg.style.maxHeight = '100%';
+        realImg.style.objectFit = 'contain';
+        pageDiv.appendChild(realImg);
+        
+        // Cập nhật flipbook nếu cần
+        if (pageFlipInstance && typeof pageFlipInstance.update === 'function') {
+          setTimeout(() => pageFlipInstance.update(), 50);
+        }
+      }
+    };
+    img.onerror = () => {
+      console.warn(`Không thể tải ảnh: ${imageUrl}`);
+      loadedImages[pageIndex] = true;
+      totalLoaded++;
+      updateLoadingProgress();
+    };
+    img.src = imageUrl;
+    
     return pageDiv;
   }
   
-  // ======================= GIẢI PHÁP BÌA ĐƠN THUẦN TÚY =======================
-  // Mẹo: Để trang đầu là 1 trang duy nhất ở giữa, KHÔNG có trang phụ bên cạnh,
-  // chúng ta sẽ tùy chỉnh số lượng trang thực tế + cấu hình flipbook đúng cách.
-  // Cách tiếp cận: 
-  // - Nếu tổng số trang là lẻ, thêm 1 trang trống ảo ở cuối để flipbook hoạt động đẹp
-  // - Nhưng với chế độ showCover = true, trang đầu sẽ là single cover. 
-  // Tuy nhiên thư viện có bug tạo thêm 1 trang phụ => khắc phục bằng cách điều chỉnh startPage=0 và không dùng cover cứng.
-  // Thực tế, để chắc chắn KHÔNG có trang phụ nào bên cạnh bìa, tôi sẽ dùng giải pháp: 
-  // Tạo mảng pages gốc, thêm 1 trang ảo CUỐI cùng (nếu cần) và set startIndex=0. Dùng "showCover: true" kết hợp với việc 
-  // đảm bảo rằng page đầu tiên trong danh sách là bìa. Thư viện sẽ hiểu trang đầu là cover đơn.
-  async function initSingleCoverFlipbook() {
+  // Khởi tạo flipbook với 50 trang
+  function initFlipbook() {
+    if (!container) return;
+    
+    loadingStatus.innerHTML = '🔄 Đang tạo sách 3D với 50 trang...';
+    container.innerHTML = '';
+    
+    // Tạo tất cả các trang
+    for (let i = 0; i < TOTAL_PAGES; i++) {
+      const pageDiv = createPageElement(i, imagePaths[i]);
+      container.appendChild(pageDiv);
+      pageDivs.push(pageDiv);
+    }
+    
+    // Khởi tạo PageFlip với showCover = true (bìa đơn)
     try {
-      loadingMsgSpan.innerHTML = '📂 Đang mở PDF, ưu tiên tải 10 trang đầu...';
-      const loadingTask = pdfjsLib.getDocument(PDF_URL);
-      pdfDoc = await loadingTask.promise;
-      totalPages = pdfDoc.numPages;
-      totalSpan.innerText = totalPages;
-      pageImages = new Array(totalPages).fill(null);
-      
-      // Tải 10 trang ưu tiên
-      const priorityIndices = [];
-      for (let i = 0; i < Math.min(PRIORITY_PAGES, totalPages); i++) priorityIndices.push(i);
-      await Promise.all(priorityIndices.map(idx => renderSinglePage(pdfDoc, idx)));
-      
-      // Tạo DOM các trang thật (không thêm trang ảo nào cả - vì showCover sẽ tự xử lý cover đơn)
-      container.innerHTML = '';
-      const allPageDivs = [];
-      for (let i = 0; i < totalPages; i++) {
-        const hasImage = pageImages[i] !== null;
-        const pageDiv = createPageElement(i, hasImage ? pageImages[i] : null);
-        container.appendChild(pageDiv);
-        allPageDivs.push(pageDiv);
-      }
-      pageDivs = allPageDivs;
-      
-      // Quan trọng: Khởi tạo với showCover = true giúp trang đầu là cover đơn (1 trang giữa)
-      // Và KHÔNG có trang phụ nào thêm vào bên cạnh bìa vì chúng ta không tạo thêm phần tử thừa.
-      // Đảm bảo kích thước responsive cho mobile
-      if (typeof St === 'undefined' || !St.PageFlip) {
-        throw new Error('PageFlip library chưa tải');
-      }
-      
       pageFlipInstance = new St.PageFlip(container, {
-        width: 820,
-        height: 580,            // Tỷ lệ ngang rõ ràng
+        width: 900,
+        height: 620,
         size: 'stretch',
-        minWidth: 300,
-        maxWidth: 1300,
-        minHeight: 360,
-        maxHeight: 900,
-        showCover: true,        // BẬT BÌA ĐƠN - trang đầu tiên sẽ hiển thị 1 TRANG DUY NHẤT ở giữa
-        mobileScrollSupport: false,
+        minWidth: 320,
+        maxWidth: 1400,
+        minHeight: 400,
+        maxHeight: 850,
+        showCover: true,        // Bìa đơn ở giữa
         drawShadow: true,
-        flippingTime: 420,
-        maxShadowOpacity: 0.45,
+        flippingTime: 450,
+        maxShadowOpacity: 0.5,
         autoSize: true,
         useMouseEvents: true,
+        swipeDistance: 30,
+        mobileScrollSupport: false,
         clickEventClasses: []
       });
       
       pageFlipInstance.loadFromHTML(pageDivs);
       
-      modeLabelSpan.innerText = 'Bìa đơn (1 trang trung tâm)';
-      stateLabelSpan.innerText = 'sẵn sàng';
-      
       // Sự kiện khi khởi tạo xong
       pageFlipInstance.on('init', () => {
-        console.log('Flipbook đã sẵn sàng - CHỈ 1 TRANG BÌA Ở GIỮA, không có trang phụ');
-        // Kiểm tra: số lượng page được hiển thị lúc đầu phải là 1 (cover)
-        const currentPg = pageFlipInstance.getCurrentPageIndex();
-        currentSpan.innerText = currentPg + 1;
-        stateLabelSpan.innerText = 'đọc';
+        console.log('Flipbook 50 trang đã sẵn sàng');
+        stateLabel.innerText = 'sẵn sàng';
+        loadingStatus.innerHTML = '🎉 Sách đã sẵn sàng! Hãy lật trang.';
         
-        // Đảm bảo rằng trang đầu tiên hiển thị đúng 1 trang (đã được showCover xử lý)
-        // Nếu vẫn còn lỗi do thư viện, chúng ta force update layout
-        setTimeout(() => {
-          if (pageFlipInstance && typeof pageFlipInstance.update === 'function') {
-            pageFlipInstance.update();
-          }
-        }, 100);
+        // Cập nhật số trang hiện tại
+        const currentPage = pageFlipInstance.getCurrentPageIndex();
+        currentSpan.innerText = currentPage + 1;
       });
       
       // Theo dõi lật trang
       pageFlipInstance.on('flip', (e) => {
         const pageIndex = e.data;
         currentSpan.innerText = pageIndex + 1;
-        // Tải các trang lân cận để tối ưu
-        if (pdfDoc) {
-          const neighbors = [pageIndex - 1, pageIndex, pageIndex + 1, pageIndex + 2];
-          neighbors.forEach(idx => {
-            if (idx >= 0 && idx < totalPages && pageImages[idx] === null) {
-              renderSinglePage(pdfDoc, idx).catch(err => console.warn);
-            }
-          });
-        }
+        
+        // Tải trước các trang lân cận để trải nghiệm mượt mà
+        const neighbors = [pageIndex - 1, pageIndex, pageIndex + 1, pageIndex + 2];
+        neighbors.forEach(idx => {
+          if (idx >= 0 && idx < TOTAL_PAGES && !loadedImages[idx]) {
+            // Kích hoạt tải nếu chưa có
+            const img = new Image();
+            img.src = imagePaths[idx];
+            img.onload = () => {
+              if (!loadedImages[idx]) {
+                loadedImages[idx] = true;
+                totalLoaded++;
+                updateLoadingProgress();
+                
+                // Cập nhật DOM nếu trang đó đang hiển thị skeleton
+                const targetDiv = pageDivs[idx];
+                if (targetDiv && targetDiv.querySelector('.skeleton-page')) {
+                  while (targetDiv.firstChild) targetDiv.removeChild(targetDiv.firstChild);
+                  const realImg = document.createElement('img');
+                  realImg.src = imagePaths[idx];
+                  realImg.alt = `Trang ${idx + 1}`;
+                  realImg.style.maxWidth = '100%';
+                  realImg.style.maxHeight = '100%';
+                  realImg.style.objectFit = 'contain';
+                  targetDiv.appendChild(realImg);
+                }
+              }
+            };
+          }
+        });
       });
       
       pageFlipInstance.on('changeState', (newState) => {
-        stateLabelSpan.innerText = newState;
+        if (newState === 'read') stateLabel.innerText = 'đang đọc';
+        else if (newState === 'flipping') stateLabel.innerText = 'đang lật';
+        else stateLabel.innerText = newState;
       });
       
-      // Nút điều khiển
-      prevBtn.onclick = () => { if (pageFlipInstance) pageFlipInstance.flipPrev(); };
-      nextBtn.onclick = () => { if (pageFlipInstance) pageFlipInstance.flipNext(); };
-      
-      updateProgress();
-      
-      // Tải các trang còn lại ngầm (không ảnh hưởng trải nghiệm)
-      setTimeout(() => {
-        loadRemainingPagesLazy(pdfDoc, new Set(priorityIndices));
-      }, 500);
+      // Xử lý nút bấm
+      prevBtn.onclick = () => {
+        if (pageFlipInstance) pageFlipInstance.flipPrev();
+      };
+      nextBtn.onclick = () => {
+        if (pageFlipInstance) pageFlipInstance.flipNext();
+      };
       
     } catch (error) {
-      console.error('Lỗi khởi tạo:', error);
-      loadingMsgSpan.innerHTML = `❌ Lỗi tải PDF: ${error.message || 'Kiểm tra file output_split.pdf'}`;
-      totalSpan.innerText = '?';
-      stateLabelSpan.innerText = 'lỗi';
+      console.error('Lỗi khởi tạo flipbook:', error);
+      loadingStatus.innerHTML = '❌ Lỗi khởi tạo sách. Vui lòng kiểm tra lại.';
+      stateLabel.innerText = 'lỗi';
     }
   }
   
-  // Tải các trang còn lại (lazy)
-  async function loadRemainingPagesLazy(pdfDocument, prioritySet) {
-    if (!pdfDocument) return;
-    const remainingIndices = [];
-    for (let i = 0; i < totalPages; i++) {
-      if (pageImages[i] === null && !prioritySet.has(i)) {
-        remainingIndices.push(i);
-      }
-    }
-    for (let idx of remainingIndices) {
-      if (pageImages[idx] === null) {
-        await renderSinglePage(pdfDocument, idx);
-        await new Promise(resolve => setTimeout(resolve, 70));
-      }
-    }
-    loadingMsgSpan.innerHTML = '🎉 Đã tải xong toàn bộ trang. Lật trang mượt mà!';
-    updateProgress();
-  }
-  
-  // Resize handler cho responsive
+  // Tự động resize khi thay đổi kích thước màn hình
   let resizeTimer;
   window.addEventListener('resize', () => {
     if (resizeTimer) clearTimeout(resizeTimer);
@@ -414,9 +486,9 @@
     }, 150);
   });
   
-  // Khởi động
+  // Khởi động ứng dụng
   document.addEventListener('DOMContentLoaded', () => {
-    initSingleCoverFlipbook();
+    initFlipbook();
   });
 </script>
 </body>
