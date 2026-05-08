@@ -37,10 +37,10 @@
       overflow: visible;
       box-shadow: 0 20px 40px rgba(245, 240, 230, 0.8);
 
-      /* Ẩn cho đến khi hoàn tất khởi tạo */
+      /* Ẩn ban đầu, chờ layout ổn định mới hiện */
       visibility: hidden;
       opacity: 0;
-      transition: opacity 0.3s;
+      transition: opacity 0.3s ease;
     }
 
     .flip-book.ready {
@@ -54,7 +54,8 @@
       align-items: center;
       justify-content: center;
       overflow: hidden;
-      /* Giữ khung 14:9 ngay cả khi ảnh chưa load (dự phòng) */
+
+      /* Giữ tỉ lệ khung cố định giúp tránh sụp đổ chiều cao */
       aspect-ratio: 14 / 9;
       width: 100%;
     }
@@ -66,9 +67,11 @@
       display: block;
     }
 
-    /* Xóa khoảng trống giữa hai trang */
+    /* Loại bỏ khoảng trống giữa hai trang */
     .stf__wrapper {
       gap: 0 !important;
+      /* Ngăn transition ngoài ý muốn gây nhảy */
+      transition: none !important;
     }
 
     .stf__block {
@@ -86,12 +89,12 @@
       padding: 0 !important;
     }
 
-    /* Dịch trang bìa vào giữa (khi chỉ hiển thị 1 trang) */
+    /* Dịch bìa đơn vào giữa – không dùng transition để tránh giật */
     .flip-book.single-cover .stf__wrapper {
-      transform: translateX(-25%);
+      transform: translateX(-25%) !important;
+      transition: none !important;
     }
 
-    /* Responsive */
     @media (max-width: 768px) {
       .flip-book {
         width: min(95vw, 700px);
@@ -102,8 +105,7 @@
 </head>
 <body>
   <div class="flipbook-wrapper">
-    <!-- **Thêm class single-cover sẵn để khi hiện lên đã đúng vị trí** -->
-    <div class="flip-book single-cover" id="flipbook"></div>
+    <div class="flip-book" id="flipbook"></div>
   </div>
 
   <script>
@@ -114,7 +116,7 @@
 
     const container = document.getElementById('flipbook');
 
-    // 1. Tạo các phần tử trang (chưa cần ảnh load xong)
+    // Tạo các phần tử trang với ảnh
     const pages = imagePaths.map((src) => {
       const page = document.createElement('div');
       page.className = 'page';
@@ -124,7 +126,7 @@
       return page;
     });
 
-    // 2. Chờ toàn bộ ảnh tải xong
+    // Chờ tất cả ảnh load hoàn tất
     function waitForAllImages() {
       return Promise.all(
         pages.map((page) => {
@@ -134,14 +136,14 @@
               resolve();
             } else {
               img.onload = resolve;
-              img.onerror = resolve; // vẫn tiếp tục nếu có ảnh lỗi
+              img.onerror = resolve;
             }
           });
         })
       );
     }
 
-    // 3. Sau khi ảnh sẵn sàng, khởi tạo sách
+    // Sau khi toàn bộ ảnh sẵn sàng
     waitForAllImages().then(() => {
       const pageFlip = new St.PageFlip(container, {
         width: 1400,
@@ -159,7 +161,6 @@
 
       pageFlip.loadFromHTML(pages);
 
-      // Hàm xóa khoảng trống giữa hai trang (canvas)
       function removeCenterGap() {
         requestAnimationFrame(() => {
           const wrapper = container.querySelector('.stf__wrapper');
@@ -181,28 +182,40 @@
         });
       }
 
-      // 4. Khi sách đã khởi tạo xong
+      // Khi thư viện khởi tạo xong
       pageFlip.on('init', () => {
-        // Đảm bảo bắt đầu ở trang bìa (trang 0)
-        pageFlip.turnToPage(0);
-        removeCenterGap();
-
-        // Cho sách hiển thị – lúc này class single-cover đã có sẵn, không bị nhảy
+        // Đảm bảo layout đã tính toán ổn định trước khi hiển thị
+        // Sử dụng double rAF để chờ mọi rendering hoàn tất
         requestAnimationFrame(() => {
-          container.classList.add('ready');
+          requestAnimationFrame(() => {
+            // Thêm class single-cover cho trang bìa
+            container.classList.add('single-cover');
+            removeCenterGap();
+
+            // Hiển thị sách một cách mượt mà
+            container.classList.add('ready');
+          });
         });
       });
 
-      // 5. Cập nhật class single-cover khi lật trang
+      // Khi lật trang (từ bìa sang trang đôi hoặc ngược lại)
       pageFlip.on('flip', (e) => {
-        container.classList.toggle('single-cover', e.data === 0);
+        if (e.data === 0) {
+          container.classList.add('single-cover');
+        } else {
+          container.classList.remove('single-cover');
+        }
         removeCenterGap();
       });
 
-      // 6. Cập nhật khi resize màn hình
+      // Cập nhật khi resize cửa sổ
+      let resizeTimer;
       window.addEventListener('resize', () => {
-        pageFlip.update();
-        removeCenterGap();
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => {
+          pageFlip.update();
+          removeCenterGap();
+        }, 100);
       });
     });
   </script>
