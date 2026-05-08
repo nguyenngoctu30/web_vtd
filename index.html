@@ -37,7 +37,7 @@
       overflow: visible;
       box-shadow: 0 20px 40px rgba(245, 240, 230, 0.8);
 
-      /* Ẩn khi đang init, chỉ hiện sau khi load xong ảnh */
+      /* Ẩn cho đến khi hoàn tất khởi tạo */
       visibility: hidden;
       opacity: 0;
       transition: opacity 0.3s;
@@ -54,8 +54,7 @@
       align-items: center;
       justify-content: center;
       overflow: hidden;
-
-      /* Giữ tỉ lệ khung cố định 14:9, ngay cả khi ảnh chưa load */
+      /* Giữ khung 14:9 ngay cả khi ảnh chưa load (dự phòng) */
       aspect-ratio: 14 / 9;
       width: 100%;
     }
@@ -67,7 +66,7 @@
       display: block;
     }
 
-    /* Xóa khoảng trống giữa 2 trang */
+    /* Xóa khoảng trống giữa hai trang */
     .stf__wrapper {
       gap: 0 !important;
     }
@@ -87,11 +86,12 @@
       padding: 0 !important;
     }
 
-    /* Dịch bìa đơn vào giữa */
+    /* Dịch trang bìa vào giữa (khi chỉ hiển thị 1 trang) */
     .flip-book.single-cover .stf__wrapper {
       transform: translateX(-25%);
     }
 
+    /* Responsive */
     @media (max-width: 768px) {
       .flip-book {
         width: min(95vw, 700px);
@@ -102,7 +102,8 @@
 </head>
 <body>
   <div class="flipbook-wrapper">
-    <div class="flip-book" id="flipbook"></div>
+    <!-- **Thêm class single-cover sẵn để khi hiện lên đã đúng vị trí** -->
+    <div class="flip-book single-cover" id="flipbook"></div>
   </div>
 
   <script>
@@ -113,18 +114,17 @@
 
     const container = document.getElementById('flipbook');
 
-    // Tạo các trang với ảnh (chưa cần load xong)
+    // 1. Tạo các phần tử trang (chưa cần ảnh load xong)
     const pages = imagePaths.map((src) => {
       const page = document.createElement('div');
       page.className = 'page';
       const img = new Image();
       img.src = src;
-      // Không cần onload từng ảnh ở đây nữa, vì ta sẽ dùng Promise.all
       page.appendChild(img);
       return page;
     });
 
-    // Hàm chờ toàn bộ ảnh load xong
+    // 2. Chờ toàn bộ ảnh tải xong
     function waitForAllImages() {
       return Promise.all(
         pages.map((page) => {
@@ -134,14 +134,14 @@
               resolve();
             } else {
               img.onload = resolve;
-              img.onerror = resolve; // vẫn resolve nếu ảnh lỗi để không treo
+              img.onerror = resolve; // vẫn tiếp tục nếu có ảnh lỗi
             }
           });
         })
       );
     }
 
-    // Sau khi tất cả ảnh đã load, khởi tạo PageFlip và hiện sách
+    // 3. Sau khi ảnh sẵn sàng, khởi tạo sách
     waitForAllImages().then(() => {
       const pageFlip = new St.PageFlip(container, {
         width: 1400,
@@ -150,7 +150,7 @@
         showCover: true,
         drawShadow: false,
         flippingTime: 450,
-        autoSize: true,          // vẫn dùng autoSize để responsive
+        autoSize: true,
         useMouseEvents: true,
         swipeDistance: 30,
         mobileScrollSupport: false,
@@ -159,6 +159,7 @@
 
       pageFlip.loadFromHTML(pages);
 
+      // Hàm xóa khoảng trống giữa hai trang (canvas)
       function removeCenterGap() {
         requestAnimationFrame(() => {
           const wrapper = container.querySelector('.stf__wrapper');
@@ -180,18 +181,25 @@
         });
       }
 
+      // 4. Khi sách đã khởi tạo xong
       pageFlip.on('init', () => {
-        container.classList.add('single-cover');
-        container.classList.add('ready');   // hiện sách
+        // Đảm bảo bắt đầu ở trang bìa (trang 0)
+        pageFlip.turnToPage(0);
         removeCenterGap();
+
+        // Cho sách hiển thị – lúc này class single-cover đã có sẵn, không bị nhảy
+        requestAnimationFrame(() => {
+          container.classList.add('ready');
+        });
       });
 
+      // 5. Cập nhật class single-cover khi lật trang
       pageFlip.on('flip', (e) => {
         container.classList.toggle('single-cover', e.data === 0);
         removeCenterGap();
       });
 
-      // Resize: update layout và giữa không có gap
+      // 6. Cập nhật khi resize màn hình
       window.addEventListener('resize', () => {
         pageFlip.update();
         removeCenterGap();
