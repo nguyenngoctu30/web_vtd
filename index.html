@@ -36,6 +36,16 @@
       border-radius: 12px;
       overflow: visible;
       box-shadow: 0 20px 40px rgba(245, 240, 230, 0.8);
+
+      /* Ẩn khi đang init, chỉ hiện sau khi load xong ảnh */
+      visibility: hidden;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .flip-book.ready {
+      visibility: visible;
+      opacity: 1;
     }
 
     .page {
@@ -44,6 +54,10 @@
       align-items: center;
       justify-content: center;
       overflow: hidden;
+
+      /* Giữ tỉ lệ khung cố định 14:9, ngay cả khi ảnh chưa load */
+      aspect-ratio: 14 / 9;
+      width: 100%;
     }
 
     .page img {
@@ -53,7 +67,7 @@
       display: block;
     }
 
-    /* Xóa hoàn toàn khoảng trống giữa 2 trang */
+    /* Xóa khoảng trống giữa 2 trang */
     .stf__wrapper {
       gap: 0 !important;
     }
@@ -78,7 +92,6 @@
       transform: translateX(-25%);
     }
 
-    /* Responsive */
     @media (max-width: 768px) {
       .flip-book {
         width: min(95vw, 700px);
@@ -100,39 +113,36 @@
 
     const container = document.getElementById('flipbook');
 
-    // Tạo các phần tử trang (chưa cần ảnh load xong)
+    // Tạo các trang với ảnh (chưa cần load xong)
     const pages = imagePaths.map((src) => {
       const page = document.createElement('div');
       page.className = 'page';
       const img = new Image();
       img.src = src;
+      // Không cần onload từng ảnh ở đây nữa, vì ta sẽ dùng Promise.all
       page.appendChild(img);
       return page;
     });
 
-    /**
-     * Trả về Promise chỉ resolve khi TẤT CẢ ảnh trong pages đã load xong.
-     * Giải quyết triệt để vấn đề "nhảy layout" trên Vercel.
-     */
+    // Hàm chờ toàn bộ ảnh load xong
     function waitForAllImages() {
-      const promises = pages.map((page) => {
-        const img = page.querySelector('img');
-        return new Promise((resolve) => {
-          if (img.complete) {
-            // Ảnh đã load (cache, local)
-            resolve();
-          } else {
-            img.onload = resolve;
-            img.onerror = resolve; // vẫn tiếp tục nếu có ảnh lỗi
-          }
-        });
-      });
-      return Promise.all(promises);
+      return Promise.all(
+        pages.map((page) => {
+          const img = page.querySelector('img');
+          return new Promise((resolve) => {
+            if (img.complete) {
+              resolve();
+            } else {
+              img.onload = resolve;
+              img.onerror = resolve; // vẫn resolve nếu ảnh lỗi để không treo
+            }
+          });
+        })
+      );
     }
 
-    // Bắt đầu chờ ảnh, sau đó mới tạo sách 3D
+    // Sau khi tất cả ảnh đã load, khởi tạo PageFlip và hiện sách
     waitForAllImages().then(() => {
-      // Lúc này tất cả ảnh đã có kích thước thật => layout ổn định
       const pageFlip = new St.PageFlip(container, {
         width: 1400,
         height: 900,
@@ -140,7 +150,7 @@
         showCover: true,
         drawShadow: false,
         flippingTime: 450,
-        autoSize: true,
+        autoSize: true,          // vẫn dùng autoSize để responsive
         useMouseEvents: true,
         swipeDistance: 30,
         mobileScrollSupport: false,
@@ -149,7 +159,6 @@
 
       pageFlip.loadFromHTML(pages);
 
-      // Hàm xóa khoảng trống giữa hai trang
       function removeCenterGap() {
         requestAnimationFrame(() => {
           const wrapper = container.querySelector('.stf__wrapper');
@@ -173,6 +182,7 @@
 
       pageFlip.on('init', () => {
         container.classList.add('single-cover');
+        container.classList.add('ready');   // hiện sách
         removeCenterGap();
       });
 
@@ -181,6 +191,7 @@
         removeCenterGap();
       });
 
+      // Resize: update layout và giữa không có gap
       window.addEventListener('resize', () => {
         pageFlip.update();
         removeCenterGap();
