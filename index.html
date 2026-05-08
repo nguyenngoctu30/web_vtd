@@ -2,6 +2,7 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8" />
+
   <meta
     name="viewport"
     content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
@@ -12,101 +13,128 @@
   <script src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.js"></script>
 
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
+
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
     }
 
-    body {
-      width: 100vw;
-      height: 100vh;
-      overflow: hidden;
-
-      background: #f5f0e6;
-
-      display: flex;
-      align-items: center;
-      justify-content: center;
+    html,
+    body{
+      width:100%;
+      height:100%;
+      overflow:hidden;
+      background:#f5f0e6;
+      font-family:sans-serif;
     }
 
-    .flipbook-wrapper {
-      width: 100vw;
-      height: 100vh;
-
-      display: flex;
-      align-items: center;
-      justify-content: center;
-
-      overflow: visible;
+    body{
+      display:flex;
+      align-items:center;
+      justify-content:center;
     }
 
-    .flip-book {
-      width: min(92vw, 1700px);
-      height: min(92vh, 940px);
+    .flipbook-wrapper{
+      width:100vw;
+      height:100vh;
 
-      background: transparent;
+      display:flex;
+      align-items:center;
+      justify-content:center;
 
-      overflow: visible;
-
-      border-radius: 12px;
+      overflow:hidden;
+      position:relative;
     }
 
-    .page {
-      background: #f5f0e6;
+    .flip-book{
 
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      width:min(92vw,1700px);
+      height:min(92vh,940px);
 
-      overflow: hidden;
+      position:relative;
+
+      overflow:visible;
+
+      transition:left .25s ease;
     }
 
-    .page img {
-      width: 100%;
-      height: 100%;
+    .page{
+      background:#f5f0e6;
 
-      object-fit: fill;
-      display: block;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+
+      overflow:hidden;
     }
 
-    /* Xóa khoảng trống giữa 2 trang */
+    .page img{
+      width:100%;
+      height:100%;
+
+      object-fit:fill;
+      display:block;
+
+      user-select:none;
+      pointer-events:none;
+    }
+
+    /* =========================
+       Xóa gap giữa 2 trang
+    ========================== */
 
     .stf__wrapper,
     .stf__parent,
     .stf__block,
-    .stf__item {
-      gap: 0 !important;
-      margin: 0 !important;
-      padding: 0 !important;
+    .stf__item{
+      margin:0 !important;
+      padding:0 !important;
+      gap:0 !important;
     }
 
     .stf__wrapper > div,
-    .stf__parent > div {
-      margin: 0 !important;
-      padding: 0 !important;
+    .stf__parent > div{
+      margin:0 !important;
+      padding:0 !important;
     }
 
-    /* Trang đầu nằm giữa */
+    /* =========================
+       Trang đầu nằm giữa
+    ========================== */
 
-    .flip-book.single-left .stf__wrapper {
-      transform: translateX(-25%) !important;
+    .flip-book.single-left{
+      left:-12.5%;
     }
 
-    /* Trang cuối nằm giữa */
+    /* =========================
+       Trang cuối nằm giữa
+    ========================== */
 
-    .flip-book.single-right .stf__wrapper {
-      transform: translateX(25%) !important;
+    .flip-book.single-right{
+      left:12.5%;
     }
 
-    /* Mobile */
+    /* =========================
+       Mobile
+    ========================== */
 
-    @media (max-width: 768px) {
-      .flip-book {
-        width: min(98vw, 700px);
-        height: min(95vh, 600px);
+    @media (max-width:768px){
+
+      .flip-book{
+        width:98vw;
+        height:95vh;
+      }
+
+      .flip-book.single-left{
+        left:-25%;
+      }
+
+      .flip-book.single-right{
+        left:25%;
       }
     }
+
   </style>
 </head>
 
@@ -122,56 +150,41 @@
 
     const imagePaths = Array.from(
       { length: TOTAL_PAGES },
-      (_, i) => `page_${String(i + 1).padStart(3, '0')}.jpg`
+      (_, i) => `page_${String(i + 1).padStart(3,'0')}.jpg`
     );
 
     const container = document.getElementById('flipbook');
 
-    const pages = imagePaths.map((src) => {
-
-      const page = document.createElement('div');
-      page.className = 'page';
-
-      const img = new Image();
-
-      img.src = src;
-
-      page.appendChild(img);
-
-      return page;
-    });
-
-    const pageFlip = new St.PageFlip(container, {
-
-      width: 1400,
-      height: 900,
-
-      size: 'stretch',
-
-      showCover: true,
-
-      drawShadow: false,
-
-      flippingTime: 450,
-
-      autoSize: true,
-
-      useMouseEvents: true,
-
-      swipeDistance: 30,
-
-      mobileScrollSupport: false,
-
-      usePortrait: false
-    });
-
-    pageFlip.loadFromHTML(pages);
+    let pageFlip;
 
     /* =========================
-       Xóa gap giữa 2 trang
+       PRELOAD IMAGE
     ========================== */
 
-    function removeCenterGap() {
+    async function preloadImages(paths){
+
+      const promises = paths.map(src => {
+
+        return new Promise(resolve => {
+
+          const img = new Image();
+
+          img.onload = resolve;
+          img.onerror = resolve;
+
+          img.src = src;
+        });
+
+      });
+
+      await Promise.all(promises);
+    }
+
+    /* =========================
+       Remove center gap
+    ========================== */
+
+    function removeCenterGap(){
 
       requestAnimationFrame(() => {
 
@@ -185,13 +198,14 @@
         });
 
       });
+
     }
 
     /* =========================
-       Căn giữa trang đầu/cuối
+       Căn giữa đầu/cuối
     ========================== */
 
-    function updateBookPosition(pageIndex) {
+    function updateBookPosition(pageIndex){
 
       container.classList.remove(
         'single-left',
@@ -200,51 +214,129 @@
 
       /* Trang đầu */
 
-      if (pageIndex === 0) {
+      if(pageIndex === 0){
 
         container.classList.add('single-left');
       }
 
       /* Trang cuối */
 
-      else if (pageIndex >= TOTAL_PAGES - 2) {
+      else if(pageIndex >= TOTAL_PAGES - 2){
 
         container.classList.add('single-right');
       }
     }
 
     /* =========================
-       Init
+       INIT BOOK
     ========================== */
 
-    pageFlip.on('init', () => {
+    async function initBook(){
 
-      updateBookPosition(0);
+      /* preload ảnh trước */
 
-      removeCenterGap();
-    });
+      await preloadImages(imagePaths);
 
-    /* =========================
-       Khi lật trang
-    ========================== */
+      /* tạo pages */
 
-    pageFlip.on('flip', (e) => {
+      const pages = imagePaths.map(src => {
 
-      updateBookPosition(e.data);
+        const page = document.createElement('div');
 
-      removeCenterGap();
-    });
+        page.className = 'page';
 
-    /* =========================
-       Resize
-    ========================== */
+        const img = document.createElement('img');
 
-    window.addEventListener('resize', () => {
+        img.src = src;
 
-      pageFlip.update();
+        page.appendChild(img);
 
-      removeCenterGap();
-    });
+        return page;
+      });
+
+      /* init pageflip */
+
+      pageFlip = new St.PageFlip(container,{
+
+        width:1400,
+        height:900,
+
+        size:'stretch',
+
+        minWidth:300,
+        maxWidth:2000,
+
+        minHeight:400,
+        maxHeight:2000,
+
+        maxShadowOpacity:0,
+
+        showCover:true,
+
+        mobileScrollSupport:false,
+
+        usePortrait:false,
+
+        autoSize:true,
+
+        drawShadow:false,
+
+        flippingTime:450,
+
+        swipeDistance:30,
+
+        useMouseEvents:true
+      });
+
+      pageFlip.loadFromHTML(pages);
+
+      /* =========================
+         INIT
+      ========================== */
+
+      pageFlip.on('init', () => {
+
+        updateBookPosition(0);
+
+        removeCenterGap();
+
+        /* fix render production */
+
+        setTimeout(() => {
+
+          pageFlip.update();
+
+          removeCenterGap();
+
+        },100);
+
+      });
+
+      /* =========================
+         FLIP
+      ========================== */
+
+      pageFlip.on('flip', (e) => {
+
+        updateBookPosition(e.data);
+
+        removeCenterGap();
+      });
+
+      /* =========================
+         RESIZE
+      ========================== */
+
+      window.addEventListener('resize', () => {
+
+        pageFlip.update();
+
+        removeCenterGap();
+      });
+
+    }
+
+    initBook();
 
   </script>
 
